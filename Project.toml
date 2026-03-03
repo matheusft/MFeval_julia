@@ -1,0 +1,19 @@
+
+name = "MFeval"
+uuid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+authors = ["MFeval.jl contributors"]
+version = "0.1.0"
+
+[deps]
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+
+[compat]
+julia = "1.9"
+StaticArrays = "1"
+
+[extras]
+Test = "8dfed614-e22c-358a-8e29-ce20bd5f8b9b"
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+
+[targets]
+test = ["Test", "BenchmarkTools"]
