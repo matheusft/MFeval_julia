@@ -34,17 +34,17 @@ MFeval.jl/
 │   │   └── read_tir.jl        ✅  TIR file parser → TireParams
 │   │
 │   ├── solver/
-│   │   ├── parse_inputs.jl    ⬜  Limit clamping, low-speed smoothing, alpha_star, pressure
-│   │   ├── basic_vars.jl      ⬜  Shared pre-calculations (dfz, dpi, star/prime vars, slip velocities)
-│   │   ├── Fx0.jl             ⬜  Pure longitudinal force
-│   │   ├── Fy0.jl             ⬜  Pure lateral force
-│   │   ├── combined_slip.jl   ⬜  Gxα and Gyκ weighting functions
-│   │   ├── Mx.jl              ⬜  Overturning moment
-│   │   ├── My.jl              ⬜  Rolling resistance moment
-│   │   ├── Mz.jl              ⬜  Self-aligning moment (trail + residual torque)
-│   │   ├── turn_slip.jl       ⬜  ζ factors for turn slip (φ, ψ_dot)
-│   │   ├── geometry.jl        ⬜  Re, Rl, ρ, contact patch (a, b), Cz
-│   │   └── relaxation.jl      ⬜  Cx, Cy, σx, σy, instantaneous Kya
+│   │   ├── parse_inputs.jl    ✅  Limit clamping, low-speed smoothing, alpha_star, pressure
+│   │   ├── basic_vars.jl      ✅  Shared pre-calculations (dfz, dpi, star/prime vars, slip velocities)
+│   │   ├── Fx0.jl             ✅  Pure longitudinal force
+│   │   ├── Fy0.jl             ✅  Pure lateral force
+│   │   ├── combined_slip.jl   ✅  Gxα and Gyκ weighting functions
+│   │   ├── Mx.jl              ✅  Overturning moment
+│   │   ├── My.jl              ✅  Rolling resistance moment
+│   │   ├── Mz.jl              ✅  Self-aligning moment (trail + residual torque)
+│   │   ├── turn_slip.jl       ✅  ζ factors for turn slip (φ, ψ_dot)
+│   │   ├── geometry.jl        ✅  Re, Rl, ρ, contact patch (a, b), Cz
+│   │   └── relaxation.jl      ✅  Cx, Cy, σx, σy, instantaneous Kya
 │   │
 │   └── api/
 │       ├── mfeval.jl          ⬜  Main scalar entry point — calls full pipeline
@@ -172,7 +172,7 @@ All data structures and the TIR file parser.
   Missing keys fall back to MATLAB-equivalent defaults. Handles inline `$`
   comments, the obsolete `[SHAPE]` section, and the `MASS`/`MASS1` rename.
 
-### Phase 2 — Scalar solver core ⬜
+### Phase 2 — Scalar solver core ✅
 
 Each calculation module is a standalone `@inline @fastmath` function taking
 only `Float64` scalar arguments. No arrays, no heap allocations, no runtime
