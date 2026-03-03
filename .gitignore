@@ -1,0 +1,29 @@
+# Julia
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+deps/deps.jl
+deps/build.log
+deps/downloads/
+docs/build/
+docs/site/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# IDEs
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Manifest (remove if you want to commit exact versions)
+Manifest.toml
