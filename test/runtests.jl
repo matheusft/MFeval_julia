@@ -5,28 +5,31 @@
 #   julia --project=. test/runtests.jl        (from the MFeval.jl/ root)
 #   julia -e 'using Pkg; Pkg.test()'          (from anywhere, after Pkg.activate)
 #
-# Individual test files can also be run directly:
+# Individual test files can also be run directly (they self-bootstrap):
 #   julia --project=. test/test_phase1.jl
+#   julia --project=. test/test_phase2.jl
 # ==============================================================================
 
 using Test
+
+# Load the module exactly once.  Both test files detect this and skip their
+# own bootstrap when already included via runtests.jl.
+include(joinpath(@__DIR__, "..", "src", "MFeval.jl"))
+using .MFeval
 
 # ── Phase 1: types, I/O, structs ──────────────────────────────────────────────
 println("=" ^ 60)
 println("Phase 1 — Types, I/O and structs")
 println("=" ^ 60)
-include("test_phase1.jl")
+include(joinpath(@__DIR__, "test_phase1.jl"))
 
-# ── Future phases — uncomment as they are implemented ─────────────────────────
-# println("=" ^ 60)
-# println("Phase 2 — Solver kernels")
-# println("=" ^ 60)
-# include("test_mf61.jl")
-# include("test_mf52.jl")
-# include("test_mf62.jl")
-# include("test_low_speed.jl")
-# include("test_turn_slip.jl")
+# ── Phase 2: scalar solver kernels ────────────────────────────────────────────
+println("=" ^ 60)
+println("Phase 2 — Scalar solver kernels")
+println("=" ^ 60)
+include(joinpath(@__DIR__, "test_phase2.jl"))
 
+# ── Phase 4 (future) — Numerical regression vs MATLAB ─────────────────────────
 # println("=" ^ 60)
 # println("Phase 4 — Numerical regression vs MATLAB")
 # println("=" ^ 60)
