@@ -29,6 +29,12 @@ println("Phase 2 — Scalar solver kernels")
 println("=" ^ 60)
 include(joinpath(@__DIR__, "test_phase2.jl"))
 
+# ── Phase 3: public API ────────────────────────────────────────────────────────
+println("=" ^ 60)
+println("Phase 3 — Public API")
+println("=" ^ 60)
+include(joinpath(@__DIR__, "test_phase3.jl"))
+
 # ── Phase 4 (future) — Numerical regression vs MATLAB ─────────────────────────
 # println("=" ^ 60)
 # println("Phase 4 — Numerical regression vs MATLAB")
