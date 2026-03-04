@@ -47,12 +47,14 @@ MFeval.jl/
 │   │   └── relaxation.jl      ✅  Cx, Cy, σx, σy, instantaneous Kya
 │   │
 │   └── api/
-│       ├── mfeval.jl          ⬜  Main scalar entry point — calls full pipeline
-│       └── mfeval_batch.jl    ⬜  Batch (matrix) entry point with Threads.@threads
+│       ├── mfeval_scalar.jl   ✅  Scalar entry point — mfeval(p, inp, modes) → MFOutputs
+│       └── mfeval_batch.jl    ✅  Batch entry point — mfeval(p, mat, modes) → Matrix / mfeval!
 │
 └── test/
     ├── runtests.jl            ✅  Test runner — include all test files here
     ├── test_phase1.jl         ✅  Types, I/O, struct correctness
+    ├── test_phase2.jl         ✅  Scalar solver kernels
+    ├── test_phase3.jl         ✅  Public API (scalar + batch)
     ├── fixtures/
     │   ├── MagicFormula52_Parameters.tir   ✅
     │   ├── MagicFormula61_Parameters.tir   ✅
@@ -89,7 +91,7 @@ julia --project=. -e 'using Pkg; Pkg.instantiate()'
 julia --project=. test/runtests.jl
 ```
 
-Expected output (Phase 1):
+Expected output (Phases 1–3):
 
 ```
 ============================================================
@@ -97,22 +99,21 @@ Phase 1 — Types, I/O and structs
 ============================================================
 Test Summary:    | Pass  Total  Time
 MFModes decoding |   15     15  0.0s
-Test Summary:         | Pass  Total  Time
-MFInputs constructors |   12     12  0.0s
-Test Summary:        | Pass  Total  Time
-MFOutputs round-trip |    1      1  0.0s
-Test Summary:                   | Pass  Total  Time
-TireParams default construction |   21     21  0.1s
-Test Summary:  | Pass  Total  Time
-read_tir MF6.1 |   18     18  3.0s
-Test Summary:  | Pass  Total  Time
-read_tir MF5.2 |    2      2  0.0s
-Test Summary:  | Pass  Total  Time
-read_tir MF6.2 |    3      3  0.0s
-Test Summary:           | Pass  Total  Time
-read_tir error handling |    1      1  0.0s
+...
 Test Summary:                | Pass  Total  Time
 TireParams type concreteness |  269    269  0.0s
+============================================================
+Phase 2 — Scalar solver kernels
+============================================================
+Test Summary:         | Pass  Total  Time
+Phase 2: parse_inputs |   24     24  0.0s
+...
+============================================================
+Phase 3 — Public API
+============================================================
+Test Summary:                       | Pass  Total  Time
+Phase 3: mfeval scalar — smoke      |   10     10  0.0s
+...
 ```
 
 ### Run a single test file
@@ -192,12 +193,46 @@ version branches (dispatched via `TireParams{V}`).
 | `geometry.jl` | Re, Rl, ρ, contact patch a/b, Cz; iterative secant solver for MF6.2 Rl |
 | `relaxation.jl` | Cx, Cy, σx, σy, instantaneous Kya |
 
-### Phase 3 — Public API ⬜
+### Phase 3 — Public API ✅
 
-- `mfeval(params, input::MFInputs, mode::MFModes) → MFOutputs` — scalar entry
-  point, calls the full pipeline, returns a named struct.
-- `mfeval(params, inputs::Matrix, mode) → Matrix{Float64}` — batch entry point,
-  pre-allocates an `N×30` output matrix, processes rows with `Threads.@threads`.
+Two entry points, both dispatching via `TireParams{V}` — zero runtime branching.
+
+**Scalar** (`src/api/mfeval_scalar.jl`)
+
+```julia
+mfeval(p::TireParams, inp::MFInputs, modes::MFModes) → MFOutputs
+```
+
+Runs the full Phase 2 pipeline for a single operating point and returns all
+30 outputs as a typed [`MFOutputs`](@ref) struct.  The function is `@inline
+@fastmath` so the JIT can eliminate all call overhead when embedded in a loop.
+
+```julia
+p   = read_tir("MagicFormula61_Parameters.tir")
+inp = MFInputs(4000.0, 0.0, 0.05, 0.0, 0.0, 16.7)
+out = mfeval(p, inp, MFModes(111))
+println(out.Fy, "  ", out.Mz)
+```
+
+**Batch** (`src/api/mfeval_batch.jl`)
+
+```julia
+mfeval(p, inputs::Matrix{Float64}, modes)  → Matrix{Float64}   # allocates N×30
+mfeval!(out, p, inputs::Matrix{Float64}, modes) → out           # in-place, zero allocation
+```
+
+`inputs` is an N×6, N×7, or N×8 matrix (columns: Fz, κ, α, γ, φ, Vx
+[, pressure [, ω]]).  Each row is evaluated independently with
+`Threads.@threads`, giving linear scaling across cores.  Column 29
+(`inst_Kya`) is filled by a cheap serial finite-difference pass after the
+parallel evaluation.
+
+```julia
+N      = 200
+inputs = [fill(3000.0,N)  zeros(N)  LinRange(-0.3,0.3,N)  zeros(N,3)]
+out    = mfeval(p, inputs, MFModes(111))   # N×30 matrix
+Fy     = out[:, 2]
+```
 
 ### Phase 4 — Validation ⬜
 
