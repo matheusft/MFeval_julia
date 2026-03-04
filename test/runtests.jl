@@ -35,8 +35,10 @@ println("Phase 3 — Public API")
 println("=" ^ 60)
 include(joinpath(@__DIR__, "test_phase3.jl"))
 
-# ── Phase 4 (future) — Numerical regression vs MATLAB ─────────────────────────
-# println("=" ^ 60)
-# println("Phase 4 — Numerical regression vs MATLAB")
-# println("=" ^ 60)
-# include("test_vs_matlab.jl")
+# ── Phase 4: validation — edge cases, invariants, regression ──────────────────
+println("=" ^ 60)
+println("Phase 4 — Validation")
+println("=" ^ 60)
+include(joinpath(@__DIR__, "test_phase4.jl"))
+
+nothing  # suppress REPL echo of the last @testset return value
