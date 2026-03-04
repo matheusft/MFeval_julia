@@ -6,9 +6,9 @@
   **High-Performance Pacejka Magic Formula Tyre Model Implementation in Julia**
   
   [![Julia](https://img.shields.io/badge/Julia-1.9+-blue.svg)](https://julialang.org/)
-  [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-  [![Tests](https://img.shields.io/badge/Tests-611%20passing-brightgreen.svg)](#testing)
-  [![Performance](https://img.shields.io/badge/Performance-%3C1%C2%B5s-red.svg)](#performance)
+  [![License](https://img.shields.io/badge/License-MIT-green.svg)](#license)
+  [![Tests](https://img.shields.io/badge/Tests-611%20passing-brightgreen.svg)](#installation--testing)
+  [![Performance](https://img.shields.io/badge/Performance-%3C1%C2%B5s-red.svg)](#performance-benchmarks)
 
 </div>
 
@@ -166,3 +166,9 @@ Contributions welcome! Please see:
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ for the vehicle dynamics community</sub>
+</div>
