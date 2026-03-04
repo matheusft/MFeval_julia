@@ -166,9 +166,3 @@ Contributions welcome! Please see:
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
-
----
-
-<div align="center">
-  <sub>Built with ❤️ for the vehicle dynamics community</sub>
-</div>
