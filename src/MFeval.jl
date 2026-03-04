@@ -23,9 +23,9 @@ include("solver/Mz.jl")              # calc_Mz0, calc_Mz, Mz0Intermediates
 include("solver/geometry.jl")        # calc_Re, calc_rho_Rl, calc_contact_patch
 include("solver/relaxation.jl")      # calc_relax, calc_inst_Kya
 
-# ── Phase 3: public API (uncomment when complete) ──────────────────────────────
-# include("api/mfeval.jl")
-# include("api/mfeval_batch.jl")
+# ── Phase 3: public API ────────────────────────────────────────────────────────
+include("api/mfeval_scalar.jl")   # mfeval(p, inp, modes)  → MFOutputs
+include("api/mfeval_batch.jl")    # mfeval(p, mat, modes)  → Matrix / mfeval!
 
 # ── Exports ────────────────────────────────────────────────────────────────────
 export TireParams, TireMetadata
@@ -48,5 +48,8 @@ export calc_Mx, calc_My
 export calc_Mz0, calc_Mz
 export calc_Re, calc_rho_Rl, calc_contact_patch
 export calc_relax, calc_inst_Kya
+
+# Phase 3 public API
+export mfeval, mfeval!
 
 end # module MFeval
