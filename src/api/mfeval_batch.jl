@@ -78,20 +78,15 @@ function mfeval!(out    ::Matrix{Float64},
         out[i, 28] = r.sigmay;  out[i, 29] = 0.0;         out[i, 30] = r.Kxk
     end
 
-    # ── inst_Kya (col 29) — finite-difference post-pass ──────────────────────
-    # Serial pass: safe, cheap relative to the parallel force computation.
-    # Uses adjacent rows that differ in alpha (col 8) and Fy (col 2).
-    # For i=1 we use the forward difference; for i=N the backward difference.
+    # ── inst_Kya (col 29) — finite-difference post-pass (matches MATLAB) ─────
+    # MATLAB: diffFY = diff(Fy)./diff(SA); instKya = [diffFY; diffFY(end)]
     if N >= 2
-        # Forward difference for row 1
-        out[1, 29] = calc_inst_Kya(out[2,8] - out[1,8], out[2,2] - out[1,2])
-        # Central differences for rows 2..N-1
-        for i in 2:N-1
-            out[i, 29] = calc_inst_Kya(out[i+1,8] - out[i-1,8],
-                                        out[i+1,2] - out[i-1,2])
+        @inbounds for i in 1:N-1
+            d_alpha = out[i+1, 8] - out[i, 8]
+            d_Fy    = out[i+1, 2] - out[i, 2] 
+            out[i, 29] = abs(d_alpha) < 1e-15 ? 0.0 : d_Fy / d_alpha
         end
-        # Backward difference for row N
-        out[N, 29] = calc_inst_Kya(out[N,8] - out[N-1,8], out[N,2] - out[N-1,2])
+        @inbounds out[N, 29] = out[N-1, 29]
     end
 
     return out
