@@ -208,13 +208,13 @@ end
         @test isfinite(out[3, 29])
     end
 
-    @testset "zero when alpha is constant" begin
+    @testset "indeterminate when alpha is constant" begin
         N   = 5
         mat = hcat(fill(4000.0, N), zeros(N), fill(0.1, N), zeros(N,3))
-        # All rows have identical alpha → Fy difference ≈ 0 → inst_Kya ≈ 0
+        # All rows have identical alpha → d_alpha = 0, d_Fy ≈ 0 → inst_Kya = NaN
         out = mfeval(_p3_p61, mat, _p3_M111)
         for i in 1:N
-            @test abs(out[i, 29]) < 1.0   # finite-difference of identical Fy ≈ 0
+            @test isnan(out[i, 29]) || isinf(out[i, 29])   # division by zero → NaN or Inf
         end
     end
 
@@ -222,6 +222,23 @@ end
 
 # ==============================================================================
 @testset "Phase 3: batch input widths (6, 7, 8 columns)" begin
+
+    # Helper function to compare matrices with NaN equality
+    function matrices_equal_nan(a, b)
+        if size(a) != size(b)
+            return false
+        end
+        for i in eachindex(a)
+            if isnan(a[i]) && isnan(b[i])
+                continue  # NaN == NaN for this comparison
+            elseif isnan(a[i]) || isnan(b[i])
+                return false  # one NaN, one not
+            elseif !isapprox(a[i], b[i])
+                return false  # numeric difference
+            end
+        end
+        return true
+    end
 
     N = 3
     base = [4000.0 0.0 0.1 0.0 0.0 16.7]
@@ -233,11 +250,11 @@ end
     # 7-column: explicit pressure
     row7 = hcat(row3, fill(_p3_p61.inflpres, N))
     out7 = mfeval(_p3_p61, row7, _p3_M111)
-    @test out7 ≈ out6   # same pressure → same result
+    @test matrices_equal_nan(out7, out6)   # same pressure → same result
 
     # 8-column: pressure + omega=0 (solver computes it)
     row8 = hcat(row7, zeros(N))
     out8 = mfeval(_p3_p61, row8, _p3_M111)
-    @test out8 ≈ out6
+    @test matrices_equal_nan(out8, out6)
 
 end
