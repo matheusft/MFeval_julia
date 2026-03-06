@@ -57,16 +57,19 @@ estimated iteratively from Vcx and kappa.
         return (Re, Romega, omega)
     end
 
-    Re     = R0 * 0.965   # initial guess
+    Re     = R0 * 0.965   # initial guess for Re
     Romega = R0 * Q_RE0
     omega  = 0.0
+    # MATLAB convergence check uses Re_old = R0 (not R0*0.965) for first iteration
+    Re_prev = R0  
     for _ in 1:20
-        Re_prev = Re
         omega   = (ukappa * Vcx + Vcx) / Re                            # Eqn (2.5)
         Romega  = R0 * (Q_RE0 + Q_V1 * (omega * R0 / V0)^2)
-        Re      = Romega - (Fz0 / Cz) *
+        Re_new  = Romega - (Fz0 / Cz) *
                   (DREFF * atan(BREFF * uFz / Fz0) + FREFF * uFz / Fz0)
-        abs(Re - Re_prev) < 1e-9 && break
+        abs(Re_new - Re_prev) < 1e-9 && break
+        Re_prev = Re
+        Re      = Re_new
     end
     return (Re, Romega, omega)
 end
