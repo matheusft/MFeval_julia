@@ -108,22 +108,22 @@ end
     # Reference tread width
     rtw = (1.075 - 0.5 * AR) * W
 
-    # Camber deflection — guard against γ=0 → 0/0
-    cam_num = (Q_CAM1 * Rl    + Q_CAM2 * Rl^2)    * gamma
+    # Camber deflection — matches MATLAB NaN handling but guards inf/inf
+    cam_num = (Q_CAM1 * Rl + Q_CAM2 * Rl^2) * gamma
     cam_den = (Q_CAM1 * Romega + Q_CAM2 * Romega^2) * gamma
-    rho_zg  = if abs(cam_den) > 1e-15
-        (cam_num / cam_den)^2 * (rtw / 8.0) * abs(tan(gamma)) -
-        Q_CAM3 * rho_zfr * abs(gamma)
+    rho_zg = if abs(gamma) < 1e-15 || abs(cam_den) < 1e-15
+        0.0  # Guard against 0/0 or div by zero
     else
-        0.0
+        (cam_num / cam_den)^2 * (rtw / 8.0) * abs(tan(gamma)) - Q_CAM3 * rho_zfr * abs(gamma)
     end
+    rho_zg = isnan(rho_zg) ? 0.0 : rho_zg
 
     rho_z = max(rho_zfr + rho_zg, 1e-12)
 
     # Correction factor
     fcorr = (1.0 + Q_V2 * (R0 / V0) * abs(omega) -
              (Q_FCX * Fx / Fz0)^2 -
-             (rho_z / R0)^Q_FCY2 * (Q_FCY * (Fy - Sfyg) / Fz0)^2) *
+             ((rho_z / R0)^Q_FCY2 * Q_FCY * (Fy - Sfyg) / Fz0)^2) *
             (1.0 + PFZ1 * dpi)
 
     Fz_calc = fcorr * (Q_FZ1 * (rho_z / R0) + Q_FZ2 * (rho_z / R0)^2) * Fz0
@@ -236,9 +236,9 @@ end
 
     _, rho = _fz62(p, gamma, omega, Romega, dpi, Rl, Fx, Fy)
 
-    # Guard zero-force case
-    rho = (pp.uFz == 0.0) ? 1e-6 : rho
-    Cz  = pp.uFz / rho
+    # Guard zero-force case (matches MATLAB)
+    rho = (pp.Fz == 0.0) ? 1e-6 : rho
+    Cz  = pp.Fz / rho
 
     return (rho, Rl, Cz)
 end
