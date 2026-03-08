@@ -54,6 +54,13 @@ function mfeval!(out    ::Matrix{Float64},
     @assert size(out, 2) == 30   "out must have 30 columns"
     @assert ncol >= 6             "inputs must have at least 6 columns"
 
+    # Check if useMode is valid (matches MATLAB behavior)
+    if !modes.is_valid
+        # Fill entire output matrix with NaN, matching MATLAB behavior
+        fill!(out, NaN)
+        return out
+    end
+
     # ── Parallel evaluation ───────────────────────────────────────────────────
     Threads.@threads for i in 1:N
         pressure = ncol >= 7 ? inputs[i, 7] : 0.0
