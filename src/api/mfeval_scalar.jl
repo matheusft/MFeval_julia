@@ -38,6 +38,17 @@ println(out.Fy)   # lateral force [N]
                                    inp   ::MFInputs,
                                    modes ::MFModes) ::MFOutputs
 
+    # Check if useMode is valid (matches MATLAB behavior)
+    if !modes.is_valid
+        # Return NaN for all outputs, matching MATLAB behavior
+        return MFOutputs(
+            NaN, NaN, NaN, NaN, NaN, NaN,                    # Forces and moments
+            NaN, NaN, NaN, NaN, NaN, NaN,                    # Input echoes
+            NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN, # Geometry
+            NaN, NaN, NaN, NaN, NaN, NaN, NaN, NaN           # Stiffnesses
+        )
+    end
+
     # ── Stage 1: pre-processing ───────────────────────────────────────────────
     pp, ip = parse_inputs(p, inp, modes)
 
