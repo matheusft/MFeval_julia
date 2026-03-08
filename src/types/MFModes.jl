@@ -13,7 +13,7 @@
 # ==============================================================================
 
 """
-    MFModes(use_limits_check, use_alpha_star, use_turn_slip)
+    MFModes(use_limits_check, use_alpha_star, use_turn_slip, is_valid)
 
 Operating-mode flags for the Magic Formula solver, decoded from the
 3-digit `useMode` integer used by the original MATLAB mfeval.
@@ -24,6 +24,7 @@ struct MFModes
     use_limits_check ::Bool   # hundreds digit: 1=true, 2=false
     use_alpha_star   ::Bool   # tens digit:     1=false, 2=true
     use_turn_slip    ::Bool   # units digit:    1=false, 2=true
+    is_valid         ::Bool   # true if useMode is supported, false → return NaN (matches MATLAB)
 end
 
 """
@@ -43,20 +44,14 @@ function MFModes(useMode::Integer)
     hundreds, rem1 = divrem(useMode, 100)
     tens,     units = divrem(rem1,   10)
 
-    use_limits_check =
-        hundreds == 1 ? true  :
-        hundreds == 2 ? false :
-        error("MFModes: hundreds digit must be 1 or 2, got $hundreds (useMode=$useMode)")
+    # Check if this is a supported useMode (matches MATLAB behavior)
+    is_valid = (hundreds in [1, 2]) && (tens in [1, 2]) && (units in [1, 2])
+    
+    # For invalid modes, use default values but mark as invalid
+    # This matches MATLAB's behavior of accepting the call but returning NaN
+    use_limits_check = (hundreds == 1) || !is_valid  # default to true for invalid modes
+    use_alpha_star   = (tens == 2) && is_valid       # default to false for invalid modes 
+    use_turn_slip    = (units == 2) && is_valid      # default to false for invalid modes
 
-    use_alpha_star =
-        tens == 1 ? false :
-        tens == 2 ? true  :
-        error("MFModes: tens digit must be 1 or 2, got $tens (useMode=$useMode)")
-
-    use_turn_slip =
-        units == 1 ? false :
-        units == 2 ? true  :
-        error("MFModes: units digit must be 1 or 2, got $units (useMode=$useMode)")
-
-    MFModes(use_limits_check, use_alpha_star, use_turn_slip)
+    MFModes(use_limits_check, use_alpha_star, use_turn_slip, is_valid)
 end
