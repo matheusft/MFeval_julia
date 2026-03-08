@@ -25,25 +25,35 @@ const TIR_MF62 = joinpath(TIR_DIR, "MagicFormula62_Parameters.tir")
     @test m.use_limits_check == true
     @test m.use_alpha_star   == false
     @test m.use_turn_slip    == false
+    @test m.is_valid         == true
 
     m = MFModes(121)
     @test m.use_limits_check == true
     @test m.use_alpha_star   == true
     @test m.use_turn_slip    == false
+    @test m.is_valid         == true
 
     m = MFModes(112)
     @test m.use_limits_check == true
     @test m.use_alpha_star   == false
     @test m.use_turn_slip    == true
+    @test m.is_valid         == true
 
     m = MFModes(222)
     @test m.use_limits_check == false
     @test m.use_alpha_star   == true
     @test m.use_turn_slip    == true
+    @test m.is_valid         == true
 
-    @test_throws Exception MFModes(311)  # bad hundreds digit
-    @test_throws Exception MFModes(131)  # bad tens digit
-    @test_throws Exception MFModes(113)  # bad units digit
+    # Invalid useModes are now accepted (matches MATLAB) but marked as invalid
+    m_invalid1 = MFModes(311)  # bad hundreds digit
+    @test m_invalid1.is_valid == false
+    
+    m_invalid2 = MFModes(131)  # bad tens digit
+    @test m_invalid2.is_valid == false
+    
+    m_invalid3 = MFModes(113)  # bad units digit
+    @test m_invalid3.is_valid == false
 end
 
 # ==============================================================================
